@@ -155,11 +155,13 @@ public class MainActivity extends Activity implements View.OnClickListener {
     long eventID = eventsID;
 
 
-    Uri uri = ContentUris.withAppendedId(CalendarContract.Events.CONTENT_URI, eventID);
-    Intent intent = new Intent(Intent.ACTION_EDIT)
-            .setData(uri)
-            .putExtra(CalendarContract.Events.TITLE, "Bros bro-ing out.");
-    startActivity(intent);
+    ContentResolver contentResolver= getContentResolver();
+    ContentValues values = new ContentValues();
+    Uri updateUri = null;
+// The new title for the event
+    values.put(CalendarContract.Events.TITLE, "Bros bro-ing OUT.");
+    updateUri = ContentUris.withAppendedId(CalendarContract.Events.CONTENT_URI, eventID);
+    int rows = getContentResolver().update(updateUri, values, null, null);
 
 
   }
