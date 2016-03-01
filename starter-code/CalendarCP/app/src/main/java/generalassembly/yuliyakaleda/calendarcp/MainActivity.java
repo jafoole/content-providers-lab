@@ -1,8 +1,10 @@
 package generalassembly.yuliyakaleda.calendarcp;
 
 import android.app.Activity;
+import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
+import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -15,7 +17,9 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 
+import java.net.URI;
 import java.util.Calendar;
+import java.util.TimeZone;
 
 public class MainActivity extends Activity implements View.OnClickListener {
   private static final String TAG = "ga.contentproviders";
@@ -27,6 +31,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
   private Button updateEvent;
   private Button deleteEvent;
   private ListView lv;
+  long eventsID;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +46,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
     deleteEvent = (Button) findViewById(R.id.delete_event);
     updateEvent = (Button) findViewById(R.id.update_event);
     lv = (ListView) findViewById(R.id.lv);
+
 
     addEvent.setOnClickListener(this);
     getEvents.setOnClickListener(this);
@@ -88,17 +94,36 @@ public class MainActivity extends Activity implements View.OnClickListener {
  // 1. get 2 calendar instances: startTime and endTime in milliseconds and set March 1 as the
  // date of the event. The event can last as long as you want, so you can set any time.
 
+    long calID = 3;
+    long startMillis = 0;
+    long endMillis = 0;
+
+    Calendar beginTime = Calendar.getInstance();
+    beginTime.set(2016,2,1);
+    startMillis = beginTime.getTimeInMillis();
+
+    Calendar endTime = Calendar.getInstance();
+    endTime.set(2016,9,8);
+    endMillis = endTime.getTimeInMillis();
+
+
  // 2. set the following properties of the event and save the event in the provider
- //   - CalendarContract.Events.DTSTART
- //   - CalendarContract.Events.DTEND
- //   - CalendarContract.Events.TITLE
- //   - CalendarContract.Events.DESCRIPTION
- //   - CalendarContract.Events.CALENDAR_ID (the value 1 should give the default calendar)
- //   - CalendarContract.Events.EVENT_TIMEZONE
+    ContentResolver contentResolver = getContentResolver();
+    ContentValues values = new ContentValues();
+
+    values.put(CalendarContract.Events.DTSTART, startMillis);
+    values.put(CalendarContract.Events.DTEND, endMillis);
+    values.put(CalendarContract.Events.TITLE, "Code Bros");
+    values.put(CalendarContract.Events.DESCRIPTION, "Coding and Bro-ing");
+    values.put(CalendarContract.Events.CALENDAR_ID, calID);
+    values.put(CalendarContract.Events.EVENT_TIMEZONE, TimeZone.getDefault().toString());
+
+    Uri uri = contentResolver.insert(CalendarContract.Events.CONTENT_URI, values);
 
 //  3. after inserting the row in the provider, retrieve the id of the event using the method below.
 // Just uncomment the line below. You will need this id to update and delete this event later.
-//    long eventId = Long.parseLong(uri.getLastPathSegment());
+    long eventId = Long.parseLong(uri.getLastPathSegment());
+    eventsID = eventId;
   }
 
   //This method should return all the events from your calendar from February 29th till March 4th
@@ -127,11 +152,22 @@ public class MainActivity extends Activity implements View.OnClickListener {
     //TODO: Using the number eventID from the method insertEventInCalendar(), update the event
     // that was added in that method
 
+    long eventID = eventsID;
+
+
+    Uri uri = ContentUris.withAppendedId(CalendarContract.Events.CONTENT_URI, eventID);
+    Intent intent = new Intent(Intent.ACTION_EDIT)
+            .setData(uri)
+            .putExtra(CalendarContract.Events.TITLE, "Bros bro-ing out.");
+    startActivity(intent);
+
+
   }
 
   public void delete() {
     //TODO: Using the number eventID from the method insertEventInCalendar(), delete the event
     // that was added in that method
+
   }
 
   @Override
