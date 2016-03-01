@@ -1,6 +1,9 @@
 package generalassembly.yuliyakaleda.calendarcp;
 
 import android.app.Activity;
+import android.content.ContentResolver;
+import android.content.ContentUris;
+import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -154,6 +157,15 @@ public class MainActivity extends Activity implements View.OnClickListener {
     public void delete() {
         //TODO: Using the number eventID from the method insertEventInCalendar(), delete the event
         // that was added in that method
+
+        long eventID = eventsID;
+
+        ContentResolver cr = getContentResolver();
+        ContentValues values = new ContentValues();
+        Uri deleteUri = null;
+        deleteUri = ContentUris.withAppendedId(CalendarContract.Events.CONTENT_URI, eventID);
+        int rows = getContentResolver().delete(deleteUri, null, null);
+//        Log.i(DEBUG_TAG, "Rows deleted: " + rows);
     }
 
     @Override
